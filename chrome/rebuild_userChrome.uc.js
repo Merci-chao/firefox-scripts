@@ -86,7 +86,7 @@ UC.rebuild = {
         return;
 
       let scriptMenuItem = UC.rebuild.createMenuItem(scriptsSeparator.ownerDocument, null, null, script.name ? script.name : script.filename);
-      scriptMenuItem.setAttribute('onclick', 'UC.rebuild.clickScriptMenu(event)');
+      scriptMenuItem.addEventListener('click', event => UC.rebuild.clickScriptMenu(event));
       scriptMenuItem.type = 'checkbox';
       scriptMenuItem.checked = script.isEnabled;
       scriptMenuItem.setAttribute('restartless', !!script.shutdown);
@@ -238,7 +238,7 @@ UC.rebuild = {
     menuItem.label = label;
     menuItem.style.listStyleImage = icon;
     if (command)
-      menuItem.setAttribute('oncommand', command);
+      menuItem.addEventListener('command', function(event) {eval(command)});
     return menuItem;
   },
 
@@ -281,7 +281,10 @@ UC.rebuild = {
   elBuilder: function (doc, tag, props) {
     let el = doc.createXULElement(tag);
     for (let p in props) {
-      el.setAttribute(p, props[p]);
+	  if (p.startsWith("on"))
+		el.addEventListener(p.substr(2), function(event) { eval(props[p])})
+	  else
+		el.setAttribute(p, props[p]);
     }
     return el;
   },
@@ -481,7 +484,7 @@ UC.rebuild = {
       scriptsButton.label = 'User Scripts';
       scriptsButton.style.listStyleImage = 'url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAABeSURBVDhPY6AKSCms+x+SkPMfREOFwACXOAYYNQBVITrGJQ7CUO0IA0jFUO0QA3BhkEJs4iAM1Y4bgBTBDIAKkQYGlwHYMFQZbgBSBDIAF4Yqww3QbUTHUGWUAAYGAEyi7ERKirMnAAAAAElFTkSuQmCC)';
       scriptsButton.setAttribute('closemenu', 'none');
-      scriptsButton.setAttribute('oncommand', 'PanelUI.showSubView(\'appMenu-userChromeJsView\', this)');
+      scriptsButton.addEventListener('command', function() { PanelUI.showSubView('appMenu-userChromeJsView', this)});
 
       const addonsButton = aDocument.getElementById('appMenu-extensions-themes-button') ?? aDocument.getElementById('appmenu_addons') ?? viewCache.querySelector('#appMenu-extensions-themes-button');
       addonsButton.parentElement.insertBefore(scriptsButton, addonsButton);
